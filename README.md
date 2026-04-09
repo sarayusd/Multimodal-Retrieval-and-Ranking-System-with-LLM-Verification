@@ -25,7 +25,10 @@ The system combines **dense CLIP retrieval, BM25 lexical retrieval, SentenceTran
 ---
 
 ## Demo
-![Demo](images/test.mp4)
+<a href="{{ '/images/test.mp4' | relative_url }}" target="_blank"
+     style="text-decoration:none; font-size:18px;">
+    ▶️ Watch Demo
+  </a>
 
 ---
 ## Results
