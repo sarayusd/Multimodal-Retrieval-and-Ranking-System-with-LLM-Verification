@@ -1,50 +1,31 @@
-# Multimodal-Scene-Retrieval-System-with-Hybrid-Search-and-RAG
+# Multimodal Retrieval and Ranking System with LLM Verification
 
-A multimodal retrieval and reasoning system that supports **text→image, image→image, and image→caption search** using vision-language embeddings and large language models. Images and captions from the **COCO captions dataset** are encoded using **OpenCLIP** and indexed in a **ChromaDB vector database** for similarity search.
+A multimodal retrieval and reasoning system supporting **text→image, image→image, and image→caption search** using vision-language embeddings and large language models. Images and captions from the **COCO 2017 dataset** are encoded using **OpenCLIP (ViT-L-14)** and indexed in a **ChromaDB vector database** for persistent similarity search.
 
-The system combines **dense CLIP retrieval, BM25 lexical retrieval, SentenceTransformers cross-encoder reranking, GPT-4o Vision-based verification, and few-shot RAG prompting** to improve retrieval robustness and generate grounded scene explanations from retrieved evidence.
+The system combines **dense CLIP retrieval, BM25 lexical retrieval, SentenceTransformers cross-encoder reranking, GPT-4o-mini vision-based verification, and few-shot RAG prompting** to improve retrieval robustness and generate grounded scene explanations from retrieved evidence.
+
+---
 
 ## Key Features
 
-* **Multimodal Embedding Space:** Uses **OpenCLIP (ViT-L-14)** to encode images and captions from the **COCO captions dataset** into a shared embedding space.
-
-* **Vector Database Search:** Indexes image and caption embeddings in **ChromaDB** to support persistent multimodal similarity search.
-
-* **Multi-Stage Retrieval Pipeline:** Combines **dense CLIP vector retrieval, BM25 lexical retrieval, and SentenceTransformers cross-encoder reranking** to improve retrieval quality.
-
-* **Fallback Retrieval Workflow:** Implements a retrieval cascade  
-  `reranked → hybrid → dense → BM25`  
-  to ensure relevant results are returned across different query types.
-
-* **Vision-Based Verification:** Retrieved images are evaluated using **GPT-4o Vision**, which assigns an `audit_score` and `audit_verdict` to assess image relevance before explanation generation.
-
-* **Few-Shot Grounded RAG:** Uses a **LangChain PromptTemplate with few-shot examples** to generate scene explanations using retrieved captions as evidence.
-
-* **Evaluation Framework:** Includes automated evaluation computing **Recall@K, Precision@K, MRR, nDCG@K, and latency** for retrieval performance.
+- **Multimodal Embedding Space:** Uses **OpenCLIP (ViT-L-14)** to encode images and captions from the **COCO 2017 dataset** into a shared embedding space. Embeddings are cached as numpy arrays on disk for efficient startup.
+- **Vector Database Search:** Indexes image embeddings in **ChromaDB** for persistent multimodal similarity search across sessions.
+- **Multi-Stage Retrieval Pipeline:** Combines **dense CLIP vector retrieval, BM25 lexical retrieval, and SentenceTransformers cross-encoder reranking** with hybrid score fusion (0.7 dense + 0.3 BM25) to improve retrieval quality.
+- **Fallback Retrieval Workflow:** Implements a production-style retrieval cascade — `reranked → hybrid` — with exception handling to ensure results are returned under degraded conditions.
+- **Vision-Based Verification:** Retrieved images are passed to **GPT-4o-mini Vision**, which assigns an `audit_score` (0–10) and `audit_verdict` (match / weak_match / reject). Final ranking uses a blended score of `0.7 × rerank_score + 0.3 × audit_score`. Rejected results are filtered before display.
+- **Few-Shot Grounded RAG:** Uses a **LangChain PromptTemplate with few-shot examples** to generate scene explanations using retrieved captions as grounded evidence.
+- **Evaluation Framework:** Automated evaluation over 300 COCO 2017 queries computing **Recall@K, Precision@K, MRR, nDCG@K, and median latency** across all pipeline stages.
+- **Interactive Chainlit Demo:** Deployed as a standalone Chainlit application with artifact-based serving — loads pre-exported embeddings and metadata from disk and returns ranked, audited results with captions, scores, and audit verdicts interactively.
 
 ---
 
-## Architecture
+## Results
 
-![Architecture](images/agent.png)
+| Stage | Recall@1 | Recall@5 | MRR | nDCG@5 |
+|---|---|---|---|---|
+| Plain dense | 0.37 | 0.65 | 0.47 | 0.52 |
+| Cached / ChromaDB | 0.36 | 0.64 | 0.47 | 0.51 |
+| Hybrid (CLIP + BM25) | 0.80 | 0.92 | 0.85 | 0.86 |
+| Hybrid + reranked | **0.96** | **0.98** | **0.97** | **0.97** |
 
-The system follows a modular pipeline:
-
-1. **Data Ingestion:** Load the **COCO captions dataset** and map captions to image paths.  
-2. **Encoding:** Images and captions are encoded using **OpenCLIP** to generate multimodal embeddings.  
-3. **Storage:** Image and caption embeddings are indexed in **ChromaDB** for vector similarity search.  
-4. **Retrieval:** The system supports **text→image, image→image, and image→caption retrieval** through dense retrieval, followed by **hybrid retrieval and cross-encoder reranking**.  
-5. **Verification:** Retrieved images are checked using **GPT-4o Vision auditing** to evaluate query relevance.  
-6. **Reasoning:** Retrieved captions are formatted as context and passed into a **few-shot RAG prompt** to generate a grounded scene explanation.
-
----
-
-## Tech Stack
-
-* **Languages:** Python  
-* **Vision-Language Models:** OpenCLIP (ViT-L-14)  
-* **Vector Database:** ChromaDB  
-* **Retrieval and Ranking:** BM25, SentenceTransformers cross-encoder  
-* **LLM Reasoning:** LangChain, OpenAI API (**GPT-4o Vision**, **GPT-4o-mini**)  
-* **Data Processing:** NumPy, Pandas  
-* **Visualization:** Matplotlib
+Hybrid reranking achieves **~2.6× improvement in Recall@1** over the plain
