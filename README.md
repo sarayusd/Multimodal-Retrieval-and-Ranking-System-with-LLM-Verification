@@ -26,7 +26,6 @@ The system combines **dense CLIP retrieval, BM25 lexical retrieval, SentenceTran
 
 ## Demo
 ![Demo](images/test.mp4)
-https://user-images.githubusercontent.com/your-user-id/your-video.mp4
 
 ---
 ## Results
