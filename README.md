@@ -18,7 +18,17 @@ The system combines **dense CLIP retrieval, BM25 lexical retrieval, SentenceTran
 - **Interactive Chainlit Demo:** Deployed as a standalone Chainlit application with artifact-based serving — loads pre-exported embeddings and metadata from disk and returns ranked, audited results with captions, scores, and audit verdicts interactively.
 
 ---
+## Architecture
 
+![Architecture](images/agent.png)
+
+---
+
+## Demo
+![Demo](images/test.mp4)
+https://user-images.githubusercontent.com/your-user-id/your-video.mp4
+
+---
 ## Results
 
 | Stage | Recall@1 | Recall@5 | MRR | nDCG@5 |
