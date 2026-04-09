@@ -21,14 +21,13 @@ The system combines **dense CLIP retrieval, BM25 lexical retrieval, SentenceTran
 ## Architecture
 
 ![Architecture](images/agent.png)
+
+---
 ## Demo
 
 [![▶️ Watch the demo]](images/test.mp4)
 
 ---
-
-## Demo
-## Demo
 
 
 
